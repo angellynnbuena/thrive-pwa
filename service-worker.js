@@ -1,9 +1,9 @@
 // Service Worker for Thrive - Enables offline functionality
 const CACHE_NAME = 'thrive-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './manifest.json'
 ];
 
 // Install Service Worker

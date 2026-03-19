@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Thrive - Daily Journal & Mental Wellness</title>
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#7BA888">
     <meta name="description" content="A gamified daily journaling app for mental wellness, emotional tracking, and personal growth">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Thrive">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23667eea' width='180' height='180' rx='40'/><text x='50%' y='50%' font-size='90' fill='white' dominant-baseline='middle' text-anchor='middle' font-family='Arial'>🌱</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%237BA888' width='180' height='180' rx='40'/><text x='50%' y='50%' font-size='90' fill='white' dominant-baseline='middle' text-anchor='middle' font-family='Arial'>🌱</text></svg>">
     <link rel="manifest" href="manifest.json">
     <style>
         * {
@@ -20,9 +20,9 @@
         }
 
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
+            --primary: #7BA888;
+            --primary-dark: #6B8E71;
+            --secondary: #9BB896;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
@@ -33,92 +33,113 @@
             --border: #e2e8f0;
         }
 
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f8fafc;
             color: var(--text);
             line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Header */
+        .app-header {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo {
-            font-size: 32px;
-        }
-
-        h1 {
-            font-size: 28px;
-            color: var(--primary);
-        }
-
-        .header-stats {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .stat {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        .stat-value {
+        .app-header h1 {
             font-size: 24px;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .app-header-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Stats Bar */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-mini {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-mini-value {
+            font-size: 20px;
             font-weight: bold;
             color: var(--primary);
         }
 
-        .stat-label {
-            font-size: 12px;
+        .stat-mini-label {
+            font-size: 11px;
             color: var(--text-muted);
-            text-transform: uppercase;
             margin-top: 5px;
+            text-transform: uppercase;
         }
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
+        /* Card Styles */
         .card {
             background: white;
             border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
         }
 
         .card-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: var(--text);
         }
 
+        /* Form Styles */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         label {
@@ -126,6 +147,7 @@
             font-weight: 500;
             margin-bottom: 8px;
             color: var(--text);
+            font-size: 14px;
         }
 
         input[type="text"],
@@ -145,19 +167,19 @@
         select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(123, 168, 136, 0.1);
         }
 
         textarea {
             resize: vertical;
-            min-height: 150px;
+            min-height: 120px;
         }
 
         .emotion-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .emotion-btn {
@@ -166,7 +188,7 @@
             background: white;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 24px;
+            font-size: 28px;
             transition: all 0.3s;
             text-align: center;
         }
@@ -178,7 +200,7 @@
 
         .emotion-btn.active {
             border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.1);
+            background: rgba(123, 168, 136, 0.1);
             transform: scale(1.1);
         }
 
@@ -192,26 +214,20 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            width: 100%;
         }
 
         button:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 12px rgba(123, 168, 136, 0.3);
         }
 
         button:active {
             transform: translateY(0);
         }
 
-        .btn-secondary {
-            background: var(--text-muted);
-        }
-
-        .btn-secondary:hover {
-            background: var(--text);
-        }
-
+        /* Journal Entry */
         .journal-entry {
             background: #f8fafc;
             padding: 15px;
@@ -220,20 +236,25 @@
             border-left: 4px solid var(--primary);
         }
 
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
         .entry-date {
             font-size: 12px;
             color: var(--text-muted);
-            margin-bottom: 8px;
         }
 
         .entry-emotion {
             font-size: 24px;
-            margin-bottom: 8px;
         }
 
         .entry-title {
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: var(--text);
         }
 
@@ -252,6 +273,7 @@
             border-radius: 4px;
             font-size: 12px;
             cursor: pointer;
+            width: auto;
             transition: all 0.3s;
         }
 
@@ -259,10 +281,11 @@
             background: #dc2626;
         }
 
-        .badges-container {
+        /* Badges Container */
+        .badges-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
             margin-bottom: 20px;
         }
 
@@ -273,31 +296,31 @@
             padding: 15px;
             text-align: center;
             transition: all 0.3s;
-            cursor: pointer;
         }
 
         .badge.unlocked {
             background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            border-color: #f59e0b;
+            border-color: var(--primary);
             color: white;
         }
 
         .badge-icon {
             font-size: 32px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .badge-name {
             font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 5px;
+            font-size: 13px;
+            margin-bottom: 4px;
         }
 
         .badge-desc {
-            font-size: 12px;
+            font-size: 11px;
             opacity: 0.7;
         }
 
+        /* Progress Bar */
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -310,63 +333,71 @@
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 4px;
             transition: width 0.5s ease;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .level-display {
+            background: linear-gradient(135deg, #89B8A0 0%, #6B8E71 100%);
             color: white;
             padding: 20px;
             border-radius: 8px;
             text-align: center;
+            margin: 15px 0;
+        }
+
+        .level-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .level-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: linear-gradient(135deg, #89B8A0 0%, #6B8E71 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 12px;
         }
 
         .stat-card-value {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             margin-bottom: 5px;
         }
 
         .stat-card-label {
-            font-size: 14px;
+            font-size: 12px;
             opacity: 0.9;
         }
 
-        .no-entries {
+        .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 40px 20px;
             color: var(--text-muted);
         }
 
-        .no-entries p {
-            font-size: 16px;
-            margin-bottom: 10px;
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
         }
 
-        .emoji-animation {
-            animation: bounce 0.6s ease-in-out;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
+        /* Toast Notification */
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 90px;
             right: 20px;
             background: var(--success);
             color: white;
-            padding: 16px 24px;
+            padding: 14px 20px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             animation: slideIn 0.3s ease-out;
@@ -384,72 +415,271 @@
             }
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: var(--text-muted);
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+            z-index: 100;
         }
 
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            border: none;
+            background: none;
+            font-size: 12px;
+            position: relative;
+        }
 
-            header {
-                flex-direction: column;
-                gap: 20px;
-            }
+        .nav-item:hover {
+            color: var(--primary);
+        }
 
-            .header-stats {
-                flex-wrap: wrap;
-                justify-content: center;
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Photo Styles */
+        .photo-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .photo-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .photo-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .photo-preview {
+            width: 100%;
+            height: 150px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .remove-photo-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .remove-photo-btn:hover {
+            background: #dc2626;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            height: 120px;
+            background: #f0f0f0;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-item-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .photo-item:hover .photo-item-overlay {
+            opacity: 1;
+        }
+
+        .photo-item-overlay-text {
+            color: white;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .photo-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .photo-modal.active {
+            display: flex;
+        }
+
+        .photo-modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .photo-modal-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .photo-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: white;
+            color: black;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .photo-modal-close:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .photo-with-entry {
+            margin-top: 10px;
+        }
+
+        .photo-with-entry img {
+            width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .content-area {
+                padding: 15px;
             }
 
             .emotion-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
 
-            .badges-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .stats-grid {
+            .badges-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <!-- Header -->
-        <header>
-            <div class="header-title">
-                <div class="logo">🌱</div>
-                <div>
-                    <h1>Thrive</h1>
-                </div>
-            </div>
-            <div class="header-stats">
-                <div class="stat">
-                    <div class="stat-value" id="currentStreak">0</div>
-                    <div class="stat-label">Day Streak</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="totalPoints">0</div>
-                    <div class="stat-label">Total Points</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="totalEntries">0</div>
-                    <div class="stat-label">Entries</div>
-                </div>
-            </div>
-        </header>
+        <div class="app-header">
+            <h1>🌱 Thrive</h1>
+            <div class="app-header-subtitle">Your Mental Wellness Journey</div>
+        </div>
 
-        <!-- Main Content Grid -->
-        <div class="main-content">
-            <!-- Left Column: Journal Entry Form & Recent Entries -->
-            <div>
-                <!-- Journal Entry Form -->
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Quick Stats (visible on all screens) -->
+            <div class="quick-stats" id="quickStats">
+                <div class="stat-mini">
+                    <div class="stat-mini-value" id="headerStreak">0</div>
+                    <div class="stat-mini-label">Streak</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="stat-mini-value" id="headerPoints">0</div>
+                    <div class="stat-mini-label">Points</div>
+                </div>
+                <div class="stat-mini">
+                    <div class="stat-mini-value" id="headerEntries">0</div>
+                    <div class="stat-mini-label">Entries</div>
+                </div>
+            </div>
+
+            <!-- Screen: Journal -->
+            <div class="screen active" id="journalScreen">
                 <div class="card">
                     <h2 class="card-title">📝 Today's Reflection</h2>
                     
@@ -489,59 +719,119 @@
                         </select>
                     </div>
 
-                    <button id="saveEntryBtn" style="width: 100%; margin-top: 10px;">Save Entry</button>
+                    <div class="form-group">
+                        <label>Add a Photo (Optional)</label>
+                        <div class="photo-input-group">
+                            <button type="button" class="photo-btn" id="cameraBtn">
+                                📸 Camera
+                            </button>
+                            <button type="button" class="photo-btn" id="uploadBtn">
+                                📁 Upload
+                            </button>
+                        </div>
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+                        <img id="photoPreview" class="photo-preview" style="display: none;">
+                        <button type="button" id="removePhotoBtn" class="remove-photo-btn" style="display: none;">Remove Photo</button>
+                    </div>
+
+                    <button id="saveEntryBtn">Save Entry</button>
                 </div>
 
-                <!-- Recent Entries -->
-                <div class="card" style="margin-top: 20px;">
+                <div class="card">
                     <h2 class="card-title">📚 Recent Entries</h2>
                     <div id="recentEntries"></div>
                 </div>
             </div>
 
-            <!-- Right Column: Gamification & Progress -->
-            <div>
-                <!-- Progress Stats -->
+            <!-- Screen: Progress -->
+            <div class="screen" id="progressScreen">
                 <div class="card">
                     <h2 class="card-title">🏆 Your Progress</h2>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-card-value" id="weekEntries">0</div>
-                            <div class="stat-card-label">This Week</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-value" id="monthEntries">0</div>
-                            <div class="stat-card-label">This Month</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-value" id="avgWordCount">0</div>
-                            <div class="stat-card-label">Avg Words</div>
-                        </div>
+
+                    <div class="level-display">
+                        <div class="level-label">Current Level</div>
+                        <div class="level-number" id="progressLevel">1</div>
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>Points Progress</span>
-                            <span id="pointsToNextLevel">500 / 500</span>
-                        </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>Points to Next Level</label>
                         <div class="progress-bar">
-                            <div class="progress-fill" id="pointsProgressBar" style="width: 0%;"></div>
+                            <div class="progress-fill" id="progressBar" style="width: 0%;"></div>
                         </div>
+                        <div style="text-align: center; font-size: 12px; color: var(--text-muted);" id="progressText">0 / 500</div>
                     </div>
 
-                    <div style="text-align: center; padding: 15px; background: #f0f9ff; border-radius: 8px;">
-                        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">CURRENT LEVEL</p>
-                        <p style="font-size: 32px; font-weight: bold; color: var(--primary);" id="currentLevel">1</p>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="weekCount">0</div>
+                        <div class="stat-card-label">This Week</div>
                     </div>
-                </div>
 
-                <!-- Achievements & Badges -->
-                <div class="card" style="margin-top: 20px;">
-                    <h2 class="card-title">🎖️ Achievements</h2>
-                    <div class="badges-container" id="badgesContainer"></div>
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="monthCount">0</div>
+                        <div class="stat-card-label">This Month</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="avgWords">0</div>
+                        <div class="stat-card-label">Avg Words Per Entry</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-value" id="totalWords">0</div>
+                        <div class="stat-card-label">Total Words Written</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Screen: Achievements -->
+            <div class="screen" id="achievementsScreen">
+                <div class="card">
+                    <h2 class="card-title">🎖️ Achievements</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Unlock badges by achieving milestones. Gray badges are locked, gold badges are unlocked!</p>
+                    <div class="badges-grid" id="badgesContainer"></div>
+                </div>
+            </div>
+
+            <!-- Screen: Photo Gallery -->
+            <div class="screen" id="galleryScreen">
+                <div class="card">
+                    <h2 class="card-title">📷 Photo Gallery</h2>
+                    <div id="photoGallery" class="photo-grid"></div>
+                    <div id="emptyGallery" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">📸</div>
+                        <p>No photos yet. Add photos to your entries!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Modal -->
+        <div class="photo-modal" id="photoModal">
+            <div class="photo-modal-content">
+                <button class="photo-modal-close" id="photoModalClose">✕</button>
+                <img class="photo-modal-img" id="photoModalImg" src="">
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <button class="nav-item active" data-screen="journalScreen">
+                <div class="nav-icon">📝</div>
+                <div class="nav-label">Journal</div>
+            </button>
+            <button class="nav-item" data-screen="progressScreen">
+                <div class="nav-icon">📊</div>
+                <div class="nav-label">Progress</div>
+            </button>
+            <button class="nav-item" data-screen="galleryScreen">
+                <div class="nav-icon">📷</div>
+                <div class="nav-label">Gallery</div>
+            </button>
+            <button class="nav-item" data-screen="achievementsScreen">
+                <div class="nav-icon">🏆</div>
+                <div class="nav-label">Badges</div>
+            </button>
         </div>
     </div>
 
@@ -549,6 +839,7 @@
         // Initialize app
         const app = {
             selectedEmotion: null,
+            selectedPhoto: null,
             entries: [],
             achievements: {
                 firstEntry: { icon: '📝', name: 'First Steps', desc: 'Write your first entry', condition: (entries) => entries.length === 1 },
@@ -563,7 +854,7 @@
             unlockedAchievements: []
         };
 
-        // Load data from localStorage
+        // Load data
         function loadData() {
             const saved = localStorage.getItem('thriveData');
             if (saved) {
@@ -573,7 +864,7 @@
             }
         }
 
-        // Save data to localStorage
+        // Save data
         function saveData() {
             localStorage.setItem('thriveData', JSON.stringify({
                 entries: app.entries,
@@ -604,7 +895,7 @@
             return streak;
         }
 
-        // Get total words written
+        // Get total words
         function getTotalWords(entries) {
             return entries.reduce((total, entry) => {
                 return total + (entry.content ? entry.content.split(/\s+/).length : 0);
@@ -631,25 +922,25 @@
             return areas.size >= 5;
         }
 
-        // Get entries from specific period
+        // Get entries from period
         function getEntriesFromPeriod(entries, days) {
             const startDate = new Date();
             startDate.setDate(startDate.getDate() - days);
             return entries.filter(e => new Date(e.date) >= startDate);
         }
 
-        // Calculate total points
+        // Calculate points
         function calculatePoints() {
             let points = 0;
             app.entries.forEach(entry => {
-                points += 50; // Base points per entry
+                points += 50;
                 if (entry.content.length > 200) points += 25;
                 if (entry.focusArea) points += 15;
             });
             return points;
         }
 
-        // Get next level requirements
+        // Get level info
         function getNextLevelInfo() {
             const points = calculatePoints();
             const level = Math.floor(points / 500) + 1;
@@ -660,21 +951,17 @@
 
         // Update achievements
         function updateAchievements() {
-            const newUnlockedAchievements = [];
-            
             for (const [key, achievement] of Object.entries(app.achievements)) {
                 if (!app.unlockedAchievements.includes(key) && achievement.condition(app.entries)) {
                     app.unlockedAchievements.push(key);
-                    newUnlockedAchievements.push(key);
                     showToast(`🎉 Achievement Unlocked: ${achievement.name}!`);
                 }
             }
-
             saveData();
             renderBadges();
         }
 
-        // Show toast notification
+        // Show toast
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -683,7 +970,7 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Initialize emotion buttons
+        // Init emotion buttons
         function initEmotionButtons() {
             document.querySelectorAll('.emotion-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -694,7 +981,7 @@
             });
         }
 
-        // Save new entry
+        // Save entry
         function saveEntry() {
             const title = document.getElementById('entryTitle').value.trim();
             const content = document.getElementById('entryContent').value.trim();
@@ -716,7 +1003,8 @@
                 emotion: app.selectedEmotion,
                 title: title,
                 content: content,
-                focusArea: focusArea
+                focusArea: focusArea,
+                photo: app.selectedPhoto || null
             };
 
             app.entries.unshift(entry);
@@ -734,6 +1022,7 @@
             document.getElementById('focusArea').value = '';
             document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
             app.selectedEmotion = null;
+            removePhoto();
         }
 
         // Delete entry
@@ -742,6 +1031,62 @@
             saveData();
             updateUI();
             showToast('Entry deleted');
+        }
+
+        // Handle photo selection
+        function handlePhotoSelect(file) {
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                app.selectedPhoto = e.target.result;
+                const preview = document.getElementById('photoPreview');
+                preview.src = app.selectedPhoto;
+                preview.style.display = 'block';
+                document.getElementById('removePhotoBtn').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove photo
+        function removePhoto() {
+            app.selectedPhoto = null;
+            document.getElementById('photoPreview').style.display = 'none';
+            document.getElementById('photoPreview').src = '';
+            document.getElementById('removePhotoBtn').style.display = 'none';
+            document.getElementById('photoInput').value = '';
+            document.getElementById('cameraInput').value = '';
+        }
+
+        // Open photo modal
+        function openPhotoModal(src) {
+            document.getElementById('photoModal').style.display = 'block';
+            document.getElementById('photoModalImg').src = src;
+        }
+
+        // Close photo modal
+        function closePhotoModal() {
+            document.getElementById('photoModal').style.display = 'none';
+        }
+
+        // Render photo gallery
+        function renderPhotoGallery() {
+            const grid = document.getElementById('photoGallery');
+            const photosArray = app.entries.filter(e => e.photo);
+
+            if (photosArray.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 20px; color: #666;">No photos yet. Add a photo to your next entry!</p>';
+                return;
+            }
+
+            grid.innerHTML = photosArray.map(entry => `
+                <div class="photo-item">
+                    <img src="${entry.photo}" alt="Entry photo">
+                    <div class="photo-item-overlay">
+                        <span>${new Date(entry.date).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         // Render badges
@@ -762,12 +1107,6 @@
                     <div class="badge-desc">${achievement.desc}</div>
                 `;
 
-                badge.addEventListener('mouseenter', () => {
-                    if (app.unlockedAchievements.includes(key)) {
-                        badge.style.transform = 'scale(1.05) rotate(0deg)';
-                    }
-                });
-
                 container.appendChild(badge);
             }
         }
@@ -778,7 +1117,7 @@
             const recent = app.entries.slice(0, 5);
 
             if (recent.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>📭 No entries yet. Start your journey today!</p></div>';
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No entries yet. Start your journey today!</p></div>';
                 return;
             }
 
@@ -793,8 +1132,12 @@
 
                 return `
                     <div class="journal-entry">
-                        <div class="entry-date">${dateStr}</div>
-                        <div class="entry-emotion">${entry.emotion}</div>
+                        <div class="entry-header">
+                            <div>
+                                <div class="entry-date">${dateStr}</div>
+                                <div class="entry-emotion">${entry.emotion}</div>
+                            </div>
+                        </div>
                         <div class="entry-title">${entry.title}</div>
                         <div class="entry-content">${entry.content.substring(0, 100)}${entry.content.length > 100 ? '...' : ''}</div>
                         ${entry.focusArea ? `<div style="font-size: 12px; margin-bottom: 10px; color: var(--primary);">${entry.focusArea} Focus</div>` : ''}
@@ -804,7 +1147,7 @@
             }).join('');
         }
 
-        // Update all UI
+        // Update UI
         function updateUI() {
             const totalPoints = calculatePoints();
             const levelInfo = getNextLevelInfo();
@@ -815,76 +1158,108 @@
             const avgWords = app.entries.length > 0 ? Math.round(totalWords / app.entries.length) : 0;
 
             // Update header stats
-            document.getElementById('currentStreak').textContent = currentStreak;
-            document.getElementById('totalPoints').textContent = totalPoints;
-            document.getElementById('totalEntries').textContent = app.entries.length;
+            document.getElementById('headerStreak').textContent = currentStreak;
+            document.getElementById('headerPoints').textContent = totalPoints;
+            document.getElementById('headerEntries').textContent = app.entries.length;
 
-            // Update progress stats
-            document.getElementById('weekEntries').textContent = weekEntries.length;
-            document.getElementById('monthEntries').textContent = monthEntries.length;
-            document.getElementById('avgWordCount').textContent = avgWords;
-
-            // Update level and progress bar
-            document.getElementById('currentLevel').textContent = levelInfo.level;
+            // Update progress screen
+            document.getElementById('progressLevel').textContent = levelInfo.level;
             const progressPercent = (levelInfo.pointsInLevel / 500) * 100;
-            document.getElementById('pointsProgressBar').style.width = progressPercent + '%';
-            document.getElementById('pointsToNextLevel').textContent = `${levelInfo.pointsInLevel} / 500`;
+            document.getElementById('progressBar').style.width = progressPercent + '%';
+            document.getElementById('progressText').textContent = `${levelInfo.pointsInLevel} / 500`;
+            document.getElementById('weekCount').textContent = weekEntries.length;
+            document.getElementById('monthCount').textContent = monthEntries.length;
+            document.getElementById('avgWords').textContent = avgWords;
+            document.getElementById('totalWords').textContent = totalWords;
 
-            // Render recent entries
+            // Render entries
             renderRecentEntries();
+            renderPhotoGallery();
+        }
+
+        // Screen navigation
+        function navigateToScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.screen === screenId) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Scroll to top
+            document.querySelector('.content-area').scrollTop = 0;
         }
 
         // Event listeners
         document.getElementById('saveEntryBtn').addEventListener('click', saveEntry);
+        document.getElementById('cameraBtn').addEventListener('click', () => {
+            document.getElementById('cameraInput').click();
+        });
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            document.getElementById('photoInput').click();
+        });
+        document.getElementById('photoInput').addEventListener('change', (e) => {
+            handlePhotoSelect(e.target.files[0]);
+        });
+        document.getElementById('cameraInput').addEventListener('change', (e) => {
+            handlePhotoSelect(e.target.files[0]);
+        });
+        document.getElementById('removePhotoBtn').addEventListener('click', removePhoto);
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 saveEntry();
             }
         });
 
-        // Initialize app
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                navigateToScreen(item.dataset.screen);
+            });
+        });
+
+        // Photo gallery modal
+        document.getElementById('photoModal').addEventListener('click', (e) => {
+            if (e.target.id === 'photoModal' || e.target.id === 'photoModalClose') {
+                closePhotoModal();
+            }
+        });
+
+        // Gallery item click delegation
+        document.getElementById('photoGallery').addEventListener('click', (e) => {
+            const photoItem = e.target.closest('.photo-item');
+            if (photoItem) {
+                const imgSrc = photoItem.querySelector('img').src;
+                openPhotoModal(imgSrc);
+            }
+        });
+
+        // Initialize
         loadData();
         initEmotionButtons();
         renderBadges();
         updateUI();
 
-        // Register Service Worker for PWA functionality
+        // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
+            navigator.serviceWorker.register('./service-worker.js')
                 .then(registration => {
-                    console.log('✅ Service Worker registered:', registration);
-                    
-                    // Check for updates periodically
-                    setInterval(() => {
-                        registration.update();
-                    }, 60000); // Check every minute
+                    console.log('✅ Service Worker registered');
                 })
                 .catch(error => {
-                    console.log('❌ Service Worker registration failed:', error);
+                    console.error('❌ Service Worker failed:', error);
                 });
-
-            // Listen for controller change (app update)
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    window.location.reload();
-                    refreshing = true;
-                }
-            });
         }
 
-        // Request permission for notifications (optional)
-        if ('Notification' in window && Notification.permission === 'default') {
-            // Optionally request notification permission
-            // Notification.requestPermission();
-        }
-
-        // Handle app install prompt
-        let deferredPrompt;
+        // Install prompt
+        let deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            console.log('ℹ️ App installation available');
+            console.log('✅ Install prompt ready');
         });
     </script>
 </body>
