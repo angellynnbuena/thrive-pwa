@@ -720,6 +720,135 @@
             border-top: 1px solid var(--border);
         }
 
+        /* Garden Styles */
+        .garden-container {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .plant-display {
+            font-size: clamp(60px, 15vw, 120px);
+            margin: 20px 0;
+            animation: growth 0.5s ease-out;
+        }
+
+        @keyframes growth {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .plant-name {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .plant-growth-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .plant-growth-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .plant-stage-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .plant-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .plant-action-btn {
+            background: linear-gradient(135deg, #89B8A0 0%, #6B8E71 100%);
+            color: white;
+            border: none;
+            padding: 12px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .plant-action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(123, 168, 136, 0.3);
+        }
+
+        .plant-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .plant-action-icon {
+            font-size: 20px;
+        }
+
+        .plant-action-cost {
+            font-size: 10px;
+            opacity: 0.9;
+        }
+
+        .plant-get-started {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .plant-get-started-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        .plant-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .plant-stat-item {
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .plant-stat-label {
+            color: var(--text-muted);
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .plant-stat-value {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .content-area {
@@ -1057,6 +1186,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Screen: Garden -->
+            <div class="screen" id="gardenScreen">
+                <div class="card">
+                    <h2 class="card-title">🌱 Your Garden</h2>
+                    <div id="gardenContent"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Photo Modal -->
@@ -1081,6 +1218,10 @@
                 <div class="nav-icon">📷</div>
                 <div class="nav-label">Gallery</div>
             </button>
+            <button class="nav-item" data-screen="gardenScreen">
+                <div class="nav-icon">🌱</div>
+                <div class="nav-label">Garden</div>
+            </button>
             <button class="nav-item" data-screen="achievementsScreen">
                 <div class="nav-icon">🏆</div>
                 <div class="nav-label">Badges</div>
@@ -1094,6 +1235,13 @@
             selectedEmotion: null,
             selectedPhoto: null,
             entries: [],
+            plant: {
+                hasPlant: false,
+                name: 'My Plant',
+                growthLevel: 0,
+                stage: 0,
+                totalEntriesWhenPlanted: 0
+            },
             achievements: {
                 firstEntry: { icon: '📝', name: 'First Steps', desc: 'Write your first entry', condition: (entries) => entries.length === 1 },
                 weekWarrior: { icon: '🔥', name: 'Week Warrior', desc: '7 entries in a week', condition: (entries) => checkWeeklyStreak(entries) },
@@ -1342,6 +1490,131 @@
             `).join('');
         }
 
+        // Plant growth tracker
+        function getPlantStage() {
+            const stages = ['🌰', '🌱', '🌿', '🌾', '🌳', '🌸', '🌻'];
+            return stages[app.plant.stage] || stages[stages.length - 1];
+        }
+
+        function getPlantStageName() {
+            const stageNames = ['Seed', 'Sprout', 'Seedling', 'Small Plant', 'Medium Plant', 'Blooming Plant', 'Fully Thriving'];
+            return stageNames[app.plant.stage] || 'Fully Thriving';
+        }
+
+        function updatePlantGrowth() {
+            if (!app.plant.hasPlant) return;
+            
+            const entriesSincePlanting = app.entries.length - app.plant.totalEntriesWhenPlanted;
+            app.plant.growthLevel = entriesSincePlanting;
+            
+            const newStage = Math.min(Math.floor(entriesSincePlanting / 2), 6);
+            if (newStage > app.plant.stage) {
+                app.plant.stage = newStage;
+                if (newStage === 6) {
+                    showToast('🎉 Your plant is fully thriving!');
+                } else {
+                    showToast(`🌱 Your plant grew! Now: ${getPlantStageName()}`);
+                }
+            }
+        }
+
+        function plantSeed() {
+            if (app.plant.hasPlant) return;
+            
+            app.plant.hasPlant = true;
+            app.plant.growthLevel = 0;
+            app.plant.stage = 0;
+            app.plant.totalEntriesWhenPlanted = app.entries.length;
+            saveData();
+            renderGarden();
+            showToast('🌰 You planted a seed! Journal entries will help it grow.');
+        }
+
+        function careForPlant(action) {
+            if (!app.plant.hasPlant) return;
+            
+            const points = calculatePoints();
+            const costs = { water: 15, fertilize: 25, sunlight: 20 };
+            
+            if (points < costs[action]) {
+                showToast(`❌ Need ${costs[action]} points (you have ${points})`);
+                return;
+            }
+            
+            // Track care by increasing growth
+            const growthBoosts = { water: 2, fertilize: 4, sunlight: 3 };
+            app.plant.growthLevel += growthBoosts[action];
+            
+            const messages = {
+                water: '💧 Watered! Plant is happy.',
+                fertilize: '🌿 Fertilized! Great boost!',
+                sunlight: '☀️ More sunlight! Plant loves it.'
+            };
+            
+            updatePlantGrowth();
+            saveData();
+            renderGarden();
+            showToast(messages[action]);
+        }
+
+        function renderGarden() {
+            const content = document.getElementById('gardenContent');
+            
+            if (!app.plant.hasPlant) {
+                content.innerHTML = `
+                    <div class="plant-get-started">
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Welcome to your garden! Start by planting a seed, then watch it grow as you journal.</p>
+                        <button class="plant-get-started-btn" onclick="plantSeed()">🌰 Plant a Seed (FREE)</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const progressPercent = Math.min((app.plant.growthLevel / 12) * 100, 100);
+            
+            content.innerHTML = `
+                <div class="garden-container">
+                    <div class="plant-name">"${app.plant.name}"</div>
+                    <div class="plant-display">${getPlantStage()}</div>
+                    <div class="plant-stage-label">${getPlantStageName()}</div>
+                    
+                    <div class="plant-growth-bar">
+                        <div class="plant-growth-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">${app.plant.growthLevel} / 12 growth points</div>
+                    
+                    <div class="plant-actions">
+                        <button class="plant-action-btn" onclick="careForPlant('water')">
+                            <span class="plant-action-icon">💧</span>
+                            <span>Water</span>
+                            <span class="plant-action-cost">15 pts</span>
+                        </button>
+                        <button class="plant-action-btn" onclick="careForPlant('fertilize')">
+                            <span class="plant-action-icon">🌿</span>
+                            <span>Fertilize</span>
+                            <span class="plant-action-cost">25 pts</span>
+                        </button>
+                        <button class="plant-action-btn" onclick="careForPlant('sunlight')">
+                            <span class="plant-action-icon">☀️</span>
+                            <span>Sunlight</span>
+                            <span class="plant-action-cost">20 pts</span>
+                        </button>
+                    </div>
+                    
+                    <div class="plant-stats">
+                        <div class="plant-stat-item">
+                            <div class="plant-stat-label">Journal Entries</div>
+                            <div class="plant-stat-value">${app.entries.length - app.plant.totalEntriesWhenPlanted}</div>
+                        </div>
+                        <div class="plant-stat-item">
+                            <div class="plant-stat-label">Total Growth</div>
+                            <div class="plant-stat-value">${app.plant.growthLevel}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         // Render mood tracker
         function renderMoodTracker() {
             const calendar = document.getElementById('moodCalendar');
@@ -1484,6 +1757,8 @@
             renderRecentEntries();
             renderPhotoGallery();
             renderMoodTracker();
+            renderGarden();
+            updatePlantGrowth();
         }
 
         // Screen navigation
