@@ -255,7 +255,6 @@
         .emotion-btn[data-emotion="🤩"].active {
             background: #E6D7F0;
         }
-        }
 
         button {
             padding: 10px 20px;
@@ -879,6 +878,85 @@
             border-top: 1px solid var(--border);
         }
 
+        .plant-seed-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .plant-history {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .plant-history h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+
+        .plant-history-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .plant-history-item {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .plant-history-item .plant-display.small {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .plant-rename-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .plant-rename-input {
+            flex: 1 1 160px;
+            min-width: 160px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 13px;
+            background: #fff;
+        }
+
+        .plant-rename-btn,
+        .plant-history-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .plant-rename-btn:hover,
+        .plant-history-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+        }
+
+        .plant-history-item .plant-history-btn {
+            width: 100%;
+            margin-top: 12px;
+        }
+
         .plant-stat-item {
             padding: 10px;
             background: #fafafa;
@@ -1284,15 +1362,8 @@
             selectedEmotion: null,
             selectedPhoto: null,
             entries: [],
-            plant: {
-                hasPlant: false,
-                name: 'My Plant',
-                growthLevel: 0,
-                careGrowth: 0,
-                stage: 0,
-                totalEntriesWhenPlanted: 0,
-                spentPoints: 0
-            },
+            plants: [],
+            activePlantId: null,
             achievements: {
                 firstEntry: { icon: '📝', name: 'First Steps', desc: 'Write your first entry', condition: (entries) => entries.length === 1 },
                 weekWarrior: { icon: '🔥', name: 'Week Warrior', desc: '7 entries in a week', condition: (entries) => checkWeeklyStreak(entries) },
@@ -1313,6 +1384,25 @@
                 const data = JSON.parse(saved);
                 app.entries = data.entries || [];
                 app.unlockedAchievements = data.unlockedAchievements || [];
+                app.plants = data.plants || [];
+                app.activePlantId = data.activePlantId || null;
+
+                if (data.plant && app.plants.length === 0) {
+                    const migratedPlant = {
+                        id: data.plant.id || Date.now(),
+                        name: data.plant.name || 'My Plant',
+                        type: 'Seed',
+                        growthLevel: data.plant.growthLevel || 0,
+                        careGrowth: data.plant.careGrowth || 0,
+                        stage: data.plant.stage || 0,
+                        totalEntriesWhenPlanted: data.plant.totalEntriesWhenPlanted || app.entries.length,
+                        spentPoints: data.plant.spentPoints || 0,
+                        plantedAt: new Date().toISOString(),
+                        completed: (data.plant.stage || 0) >= 6
+                    };
+                    app.plants = [migratedPlant];
+                    app.activePlantId = migratedPlant.id;
+                }
             }
         }
 
@@ -1320,7 +1410,9 @@
         function saveData() {
             localStorage.setItem('thriveData', JSON.stringify({
                 entries: app.entries,
-                unlockedAchievements: app.unlockedAchievements
+                unlockedAchievements: app.unlockedAchievements,
+                plants: app.plants,
+                activePlantId: app.activePlantId
             }));
         }
 
@@ -1542,121 +1634,231 @@
         }
 
         // Plant growth tracker
-        function getPlantStage() {
+        function getActivePlant() {
+            return app.plants.find(p => p.id === app.activePlantId) || null;
+        }
+
+        function getTotalPlantSpend() {
+            return app.plants.reduce((sum, plant) => sum + (plant.spentPoints || 0), 0);
+        }
+
+        function getAvailablePoints() {
+            return calculatePoints() - getTotalPlantSpend();
+        }
+
+        function getPlantStage(plant) {
             const stages = ['🌰', '🌱', '🌿', '🌾', '🌳', '🌸', '🌻'];
-            return stages[app.plant.stage] || stages[stages.length - 1];
+            return stages[plant?.stage] || stages[stages.length - 1];
         }
 
-        function getPlantStageName() {
+        function getPlantStageName(plant) {
             const stageNames = ['Seed', 'Sprout', 'Seedling', 'Small Plant', 'Medium Plant', 'Blooming Plant', 'Fully Thriving'];
-            return stageNames[app.plant.stage] || 'Fully Thriving';
+            return stageNames[plant?.stage] || 'Fully Thriving';
         }
 
-        function updatePlantGrowth() {
-            if (!app.plant.hasPlant) return;
-            
-            const entriesSincePlanting = app.entries.length - app.plant.totalEntriesWhenPlanted;
-            const totalGrowth = entriesSincePlanting + app.plant.careGrowth;
-            app.plant.growthLevel = totalGrowth;
-            
+        function updatePlantGrowth(plant) {
+            if (!plant) return;
+
+            const entriesSincePlanting = app.entries.length - plant.totalEntriesWhenPlanted;
+            const totalGrowth = entriesSincePlanting + plant.careGrowth;
+            plant.growthLevel = totalGrowth;
+
             const newStage = Math.min(Math.floor(totalGrowth / 3), 6);
-            if (newStage > app.plant.stage) {
-                app.plant.stage = newStage;
+            if (newStage > plant.stage) {
+                plant.stage = newStage;
                 if (newStage === 6) {
+                    plant.completed = true;
                     showToast('🎉 Your plant is fully thriving!');
                 } else {
-                    showToast(`🌱 Your plant grew! Now: ${getPlantStageName()}`);
+                    showToast(`🌱 Your plant grew! Now: ${getPlantStageName(plant)}`);
                 }
             }
         }
 
-        function plantSeed() {
-            if (app.plant.hasPlant) return;
-            
-            app.plant.hasPlant = true;
-            app.plant.growthLevel = 0;
-            app.plant.stage = 0;
-            app.plant.totalEntriesWhenPlanted = app.entries.length;
+        function plantSeed(type = 'Seed') {
+            const activePlant = getActivePlant();
+            if (activePlant && !activePlant.completed) return;
+
+            const newPlant = {
+                id: Date.now(),
+                name: `${type} ${app.plants.length + 1}`,
+                type,
+                growthLevel: 0,
+                careGrowth: 0,
+                stage: 0,
+                totalEntriesWhenPlanted: app.entries.length,
+                spentPoints: 0,
+                plantedAt: new Date().toISOString(),
+                completed: false
+            };
+
+            app.plants.push(newPlant);
+            app.activePlantId = newPlant.id;
             saveData();
             renderGarden();
-            showToast('🌰 You planted a seed! Journal entries will help it grow.');
+            showToast(`🌰 You planted a ${type}! Journal entries will help it grow.`);
         }
 
         function careForPlant(action) {
-            if (!app.plant.hasPlant) return;
-            
-            const points = calculatePoints();
+            const plant = getActivePlant();
+            if (!plant || plant.completed) return;
+
             const costs = { water: 15, fertilize: 25, sunlight: 20 };
-            const availablePoints = points - app.plant.spentPoints;
-            
+            const availablePoints = getAvailablePoints();
+
             if (availablePoints < costs[action]) {
                 showToast(`❌ Need ${costs[action]} points (you have ${availablePoints} available)`);
                 return;
             }
-            
-            // Deduct points and add growth
+
             const growthBoosts = { water: 2, fertilize: 4, sunlight: 3 };
-            app.plant.spentPoints += costs[action];
-            app.plant.careGrowth += growthBoosts[action];
-            
+            plant.spentPoints += costs[action];
+            plant.careGrowth += growthBoosts[action];
+
             const messages = {
                 water: '💧 Watered! Plant is happy.',
                 fertilize: '🌿 Fertilized! Great boost!',
                 sunlight: '☀️ More sunlight! Plant loves it.'
             };
-            
-            updatePlantGrowth();
+
+            updatePlantGrowth(plant);
             saveData();
             renderGarden();
             showToast(messages[action]);
         }
 
+        function selectPlant(plantId) {
+            app.activePlantId = plantId;
+            saveData();
+            renderGarden();
+        }
+
+        function renameActivePlant() {
+            const plant = getActivePlant();
+            if (!plant) return;
+            const input = document.getElementById('plantNameInput');
+            if (!input) return;
+
+            const newName = input.value.trim();
+            if (newName.length === 0) {
+                showToast('❌ Plant name cannot be empty');
+                return;
+            }
+            if (newName === plant.name) {
+                showToast('⚠️ Name is already set');
+                return;
+            }
+
+            plant.name = newName;
+            saveData();
+            renderGarden();
+            showToast('✏️ Plant renamed successfully');
+        }
+
+        function renderPlantHistory() {
+            const activePlant = getActivePlant();
+            const historyPlants = app.plants.filter(plant => plant.id !== activePlant?.id);
+            if (historyPlants.length === 0) return '';
+
+            const historyHtml = historyPlants.map(plant => `
+                <div class="plant-history-item">
+                    <div class="plant-display small">${getPlantStage(plant)}</div>
+                    <div class="plant-name">${plant.name}</div>
+                    <div class="plant-stage-label">${getPlantStageName(plant)}</div>
+                    <div class="plant-stat-item">
+                        <div class="plant-stat-label">Growth</div>
+                        <div class="plant-stat-value">${plant.growthLevel} / 18</div>
+                    </div>
+                    <div class="plant-stat-item">
+                        <div class="plant-stat-label">Planted</div>
+                        <div class="plant-stat-value">${new Date(plant.plantedAt).toLocaleDateString()}</div>
+                    </div>
+                    <button class="plant-history-btn" onclick="selectPlant(${plant.id})">View</button>
+                </div>
+            `).join('');
+
+            return `
+                <div class="plant-history">
+                    <h3>Previous Plants</h3>
+                    <div class="plant-history-grid">${historyHtml}</div>
+                </div>
+            `;
+        }
+
         function renderGarden() {
             const content = document.getElementById('gardenContent');
-            
-            if (!app.plant.hasPlant) {
+            const activePlant = getActivePlant();
+
+            if (!activePlant) {
                 content.innerHTML = `
                     <div class="plant-get-started">
-                        <p style="color: var(--text-muted); margin-bottom: 15px;">Welcome to your garden! Start by planting a seed, then watch it grow as you journal.</p>
-                        <button class="plant-get-started-btn" onclick="plantSeed()">🌰 Plant a Seed (FREE)</button>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">
+                            Welcome to your garden! Select a seed and then watch it grow as you journal.
+                        </p>
+                        <div class="plant-seed-grid">
+                            <button class="plant-get-started-btn" onclick="plantSeed('Sunflower')">🌻 Sunflower</button>
+                            <button class="plant-get-started-btn" onclick="plantSeed('Fern')">🌿 Fern</button>
+                            <button class="plant-get-started-btn" onclick="plantSeed('Blossom')">🌸 Blossom</button>
+                        </div>
                     </div>
+                    ${renderPlantHistory()}
                 `;
                 return;
             }
-            
+
             const points = calculatePoints();
-            const availablePoints = points - app.plant.spentPoints;
-            const progressPercent = Math.min((app.plant.growthLevel / 18) * 100, 100);
-            
+            const availablePoints = getAvailablePoints();
+            const progressPercent = Math.min((activePlant.growthLevel / 18) * 100, 100);
+            const careActions = activePlant.completed ? `
+                <div style="color: var(--text-muted); margin-bottom: 15px;">
+                    This plant is fully thriving! Grow a new seed and keep your garden alive.
+                </div>
+                <div class="plant-seed-grid">
+                    <button class="plant-get-started-btn" onclick="plantSeed('Sunflower')">🌻 Sunflower</button>
+                    <button class="plant-get-started-btn" onclick="plantSeed('Fern')">🌿 Fern</button>
+                    <button class="plant-get-started-btn" onclick="plantSeed('Blossom')">🌸 Blossom</button>
+                </div>
+            ` : `
+                <div class="plant-actions">
+                    <button class="plant-action-btn" onclick="careForPlant('water')">
+                        <span class="plant-action-icon">💧</span>
+                        <span>Water</span>
+                        <span class="plant-action-cost">15 pts</span>
+                    </button>
+                    <button class="plant-action-btn" onclick="careForPlant('fertilize')">
+                        <span class="plant-action-icon">🌿</span>
+                        <span>Fertilize</span>
+                        <span class="plant-action-cost">25 pts</span>
+                    </button>
+                    <button class="plant-action-btn" onclick="careForPlant('sunlight')">
+                        <span class="plant-action-icon">☀️</span>
+                        <span>Sunlight</span>
+                        <span class="plant-action-cost">20 pts</span>
+                    </button>
+                </div>
+            `;
+
             content.innerHTML = `
                 <div class="garden-container">
-                    <div class="plant-name">"${app.plant.name}"</div>
-                    <div class="plant-display">${getPlantStage()}</div>
-                    <div class="plant-stage-label">${getPlantStageName()}</div>
+                    <div class="plant-name">"${activePlant.name}"</div>
+                    <div class="plant-stage-label">${activePlant.type}</div>
+                    <div class="plant-display">${getPlantStage(activePlant)}</div>
+                    <div class="plant-stage-label">${getPlantStageName(activePlant)}</div>
                     
+                    <div class="plant-rename-row">
+                        <input id="plantNameInput" class="plant-rename-input" value="${activePlant.name}" placeholder="Rename plant" />
+                        <button class="plant-rename-btn" onclick="renameActivePlant()">Rename</button>
+                    </div>
+
                     <div class="plant-growth-bar">
                         <div class="plant-growth-fill" style="width: ${progressPercent}%"></div>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">${app.plant.growthLevel} / 18 growth points</div>
-                    
-                    <div class="plant-actions">
-                        <button class="plant-action-btn" onclick="careForPlant('water')">
-                            <span class="plant-action-icon">💧</span>
-                            <span>Water</span>
-                            <span class="plant-action-cost">15 pts</span>
-                        </button>
-                        <button class="plant-action-btn" onclick="careForPlant('fertilize')">
-                            <span class="plant-action-icon">🌿</span>
-                            <span>Fertilize</span>
-                            <span class="plant-action-cost">25 pts</span>
-                        </button>
-                        <button class="plant-action-btn" onclick="careForPlant('sunlight')">
-                            <span class="plant-action-icon">☀️</span>
-                            <span>Sunlight</span>
-                            <span class="plant-action-cost">20 pts</span>
-                        </button>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">
+                        ${activePlant.growthLevel} / 18 growth points
                     </div>
-                    
+
+                    ${careActions}
+
                     <div class="plant-stats">
                         <div class="plant-stat-item">
                             <div class="plant-stat-label">Total Points</div>
@@ -1668,14 +1870,15 @@
                         </div>
                         <div class="plant-stat-item">
                             <div class="plant-stat-label">Journal Entries</div>
-                            <div class="plant-stat-value">${app.entries.length - app.plant.totalEntriesWhenPlanted}</div>
+                            <div class="plant-stat-value">${app.entries.length - activePlant.totalEntriesWhenPlanted}</div>
                         </div>
                         <div class="plant-stat-item">
                             <div class="plant-stat-label">Care Growth</div>
-                            <div class="plant-stat-value">${app.plant.careGrowth}</div>
+                            <div class="plant-stat-value">${activePlant.careGrowth}</div>
                         </div>
                     </div>
                 </div>
+                ${renderPlantHistory()}
             `;
         }
 
@@ -1817,12 +2020,14 @@
             document.getElementById('avgWords').textContent = avgWords;
             document.getElementById('totalWords').textContent = totalWords;
 
+            // Update plant growth before rendering garden
+            updatePlantGrowth(getActivePlant());
+
             // Render entries
             renderRecentEntries();
             renderPhotoGallery();
             renderMoodTracker();
             renderGarden();
-            updatePlantGrowth();
         }
 
         // Screen navigation
